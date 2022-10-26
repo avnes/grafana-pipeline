@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    grafana_dashboard: "1"
+  name: custom-{{ resource_name }}
+  namespace: {{ namespace }}
+data:
+  {{ resource_name }}.json: |-
+{% filter indent(width=4) -%}
+    {{ content }}
+{% endfilter %}

@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "grafana-pipeline"
+version = "0.1.0"
+description = "Repository to automate Grafana dashboards and datasources"
+authors = ["Audun Nes <audun.nes@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+Jinja2 = "^3.1.2"
+
+[tool.poetry.dev-dependencies]
+flake8 = "^5.0.4"
+black = "^22.8.0"
+bandit = "^1.7.4"
+pylint = "^2.15.3"
+pre-commit = "^2.20.0"
+isort = "^5.10.1"
+mypy = "^0.981"
+pre-commit-hooks = "^4.3.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

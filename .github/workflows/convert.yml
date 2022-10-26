@@ -1,0 +1,53 @@
+name: Grafana settings
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - ".github/**"
+
+  workflow_dispatch:
+
+jobs:
+  convert:
+    runs-on: self-hosted
+    defaults:
+      run:
+        shell: bash
+        working-directory: "${{ github.repository }}"
+    env:
+      DEB_PYTHON_INSTALL_LAYOUT: deb
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+        with:
+          path: "${{ github.repository }}"
+
+      - name: Install Poetry
+        run: "curl -sSL https://install.python-poetry.org | python3 - --version 1.2.0a2"
+
+      - name: Install Python requirements
+        run: "/home/gh/.local/bin/poetry install --no-dev"
+
+      - name: Convert Grafana objects to Kubernetes resource
+        run: "/home/gh/.local/bin/poetry run python main.py"
+        env:
+          GRAFANA_DATASOURCES_NAMESPACE: monitoring
+          GRAFANA_DASHBOARDS_NAMESPACE: monitoring
+
+      - name: Download kubectl and set KUBECONFIG
+        run: |
+          curl -LO https://storage.googleapis.com/kubernetes-release/release/v${{ env.KUBE_VERSION }}/bin/linux/amd64/kubectl
+          chmod +x kubectl
+          mkdir -p $HOME/.kube
+          echo "$KUBE_CONFIG" > $HOME/.kube/config
+          cat $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+        env:
+          KUBE_VERSION: 1.24.6
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+
+      - name: Create Kubernetes Secrets
+        run: "./kubectl apply --filename secrets/"
+
+      - name: Create Kubernetes ConfigMaps
+        run: "./kubectl apply --filename configmaps/"
